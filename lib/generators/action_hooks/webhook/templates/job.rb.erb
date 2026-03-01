@@ -1,0 +1,19 @@
+class <%= class_name %>WebhookJob < ApplicationJob
+  queue_as :default
+
+  def perform(webhook_request_id)
+    webhook_request = ActionHooks::WebhookRequest.find(webhook_request_id)
+    payload = webhook_request.payload
+
+    # TODO: handle payload
+    # case payload["type"]
+    # when "example.event"
+    #   # handle event
+    # end
+
+    webhook_request.processed!
+  rescue => e
+    webhook_request.failed!
+    raise e
+  end
+end

@@ -8,9 +8,7 @@ class DummyWorker < ActiveJob::Base
   end
 end
 
-class DummyWebhooksController < ActionController::Base
-  include ActionHooks::WebhookControllerBehavior
-
+class DummyWebhooksController < ActionHooks::WebhookController
   private
 
   def webhook_source_name
@@ -58,12 +56,19 @@ RSpec.describe DummyWebhooksController, type: :controller do
 
       expect(response).to have_http_status(:ok)
 
-      webhook_request = ActionHooks::WebhookRequest.last
+      webhook_request = controller.instance_variable_get(:@webhook_request)
       expect(webhook_request.source).to eq("dummy")
 
       parsed_payload = webhook_request.payload.is_a?(String) ? JSON.parse(webhook_request.payload) : webhook_request.payload
       expect(parsed_payload).to eq({"foo" => "bar"})
       expect(webhook_request.state).to eq("pending")
+    end
+
+    it "sets @webhook_request as an instance variable after persistence" do
+      request.remote_addr = valid_ip
+      request.headers["X-Signature"] = "valid"
+      post :create, body: '{"foo":"bar"}', as: :json
+      expect(controller.instance_variable_get(:@webhook_request)).to be_a(ActionHooks::WebhookRequest)
     end
   end
 end

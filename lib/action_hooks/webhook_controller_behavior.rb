@@ -10,28 +10,21 @@ module ActionHooks
 
       before_action :verify_webhook_ip!
       before_action :verify_webhook_signature!
-    end
-
-    def create
-      payload = parse_webhook_payload
-
-      webhook_request = ActionHooks::WebhookRequest.create!(
-        source: webhook_source_name.to_s,
-        payload: payload,
-        state: :pending
-      )
-
-      worker_class = webhook_source_config.worker
-      worker_class&.constantize&.perform_later(webhook_request.id)
-
-      head :ok
+      before_action :persist_webhook_request!
     end
 
     private
 
+    def persist_webhook_request!
+      @webhook_request = ActionHooks::WebhookRequest.create!(
+        source: webhook_source_name.to_s,
+        payload: parse_webhook_payload,
+        state: :pending
+      )
+    end
+
     def webhook_source_name
-      # To be overridden or inferred by the controller
-      self.class.name.sub(/WebhooksController$/, "").underscore
+      raise NotImplementedError, "You must define `#webhook_source_name` in your webhook controller."
     end
 
     def webhook_source_config

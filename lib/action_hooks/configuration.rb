@@ -5,6 +5,8 @@ module ActionHooks
 
   class Source
     attr_accessor :name, :worker, :verify_signature, :allowed_ips
+    alias_method :allowed_hosts, :allowed_ips
+    alias_method :allowed_hosts=, :allowed_ips=
 
     def initialize(name)
       @name = name

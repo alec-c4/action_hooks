@@ -1,9 +1,12 @@
-class <%= class_name %>WebhooksController < ApplicationController
-  include ActionHooks::WebhookControllerBehavior
-
+class Webhooks::<%= class_name %>Controller < ActionHooks::WebhookController
   private
 
   def webhook_source_name
     :<%= file_name %>
+  end
+
+  def process_webhook(webhook_request)
+    # Business logic here.
+    # @webhook_request is also available as an instance variable.
   end
 end

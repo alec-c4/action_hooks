@@ -36,15 +36,15 @@ $ rails db:migrate
 
 ### 1. Configuration
 
-Configure your webhook sources in the generated initializer (`config/initializers/action_hooks.rb`). Each source represents a third-party service sending webhooks to your application.
+Configure your webhook sources in the generated initializer (`config/initializers/action_hooks.rb`). Each source represents a third-party service sending webhooks to your application. ActionHooks automatically mounts a catch-all route `POST /webhooks/:source`, so configuring a source is enough to start receiving requests.
 
 ```ruby
 # config/initializers/action_hooks.rb
 ActionHooks.configure do |config|
   config.add_source(:stripe) do |source|
     # The ActiveJob worker class that will process the webhook
-    source.worker = "StripeWebhookWorker"
-    
+    source.worker = "StripeWebhookJob"
+
     # Lambda to verify the signature of the incoming request
     source.verify_signature = ->(request) do
       payload = request.body.read
@@ -53,60 +53,80 @@ ActionHooks.configure do |config|
       # Stripe::Webhook::Signature.verify_header(payload, sig_header, ENV['STRIPE_WEBHOOK_SECRET'])
       true
     end
-    
-    # Optional: Restrict incoming requests to specific IP addresses
-    # source.allowed_ips = ["127.0.0.1", "10.0.0.1"]
+
+    # Optional: Restrict incoming requests to specific IP addresses/hosts
+    # source.allowed_hosts = ["127.0.0.1", "10.0.0.1"] # Also aliased as `allowed_ips`
   end
 end
 ```
 
-### 2. Generating a Webhook Controller
+### 2. Generating a Job
 
-To create an endpoint for a configured source, use the webhook generator. Pass the name of the source as an argument:
+By default, an incoming webhook is authenticated, persisted, and handed over to a background job. You can easily generate a job template for your source:
 
 ```bash
 $ rails generate action_hooks:webhook stripe
 ```
 
-This will:
-1. Create a controller at `app/controllers/stripe_webhooks_controller.rb`.
-2. Add a route to `config/routes.rb` (e.g., `post "webhooks/stripe", to: "stripe_webhooks#create"`).
-
-The generated controller includes `ActionHooks::WebhookControllerBehavior`, which handles everything from skipping CSRF verification, verifying the IP and signature, saving the request to the database, and enqueueing your worker.
-
-### 3. Processing the Webhook
-
-Create the worker class that you specified in your configuration. The worker will receive the ID of the `ActionHooks::WebhookRequest` record.
+This will create `app/jobs/stripe_webhook_job.rb`. The background job will receive the ID of the saved `ActionHooks::WebhookRequest` record:
 
 ```ruby
-# app/jobs/stripe_webhook_worker.rb
-class StripeWebhookWorker < ApplicationJob
+# app/jobs/stripe_webhook_job.rb
+class StripeWebhookJob < ApplicationJob
   queue_as :default
 
   def perform(webhook_request_id)
     webhook_request = ActionHooks::WebhookRequest.find(webhook_request_id)
-    
-    # Access the parsed JSON payload
     payload = webhook_request.payload
-    
-    # Process the payload...
-    if payload['type'] == 'payment_intent.succeeded'
-      # Do something
+
+    case payload["type"]
+    when "payment_intent.succeeded"
+      # handle payment
     end
-    
-    # Update the state of the webhook request when done
+
     webhook_request.processed!
   rescue => e
-    # Mark as failed if something goes wrong
     webhook_request.failed!
     raise e
   end
 end
 ```
 
+### 3. Custom Controller (Optional)
+
+If your webhook processing requires complex synchronous logic before placing the job into the queue, you can generate a custom controller using the `--controller` flag:
+
+```bash
+$ rails generate action_hooks:webhook stripe --controller
+```
+
+This generates:
+
+- A job: `app/jobs/stripe_webhook_job.rb` (unless `--skip-job` is provided)
+- A controller: `app/controllers/webhooks/stripe_controller.rb`
+- A specific route mapping in `config/routes.rb`
+
+Your custom controller will inherit from `ActionHooks::WebhookController`. The parent controller handles persistence, IP checks, and signature verification, while your controller can focus just on the business logic inside the `process_webhook` hook:
+
+```ruby
+# app/controllers/webhooks/stripe_controller.rb
+class Webhooks::StripeController < ActionHooks::WebhookController
+  private
+
+  def webhook_source_name
+    :stripe
+  end
+
+  def process_webhook(webhook_request)
+    # Business logic here.
+    # The default behavior inside `process_webhook` is to enqueue the configured background job.
+  end
+end
+```
+
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. 
+After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests.
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
