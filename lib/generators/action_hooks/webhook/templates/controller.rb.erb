@@ -1,0 +1,9 @@
+class <%= class_name %>WebhooksController < ApplicationController
+  include ActionHooks::WebhookControllerBehavior
+
+  private
+
+  def webhook_source_name
+    :<%= file_name %>
+  end
+end

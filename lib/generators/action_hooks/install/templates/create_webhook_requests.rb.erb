@@ -1,0 +1,14 @@
+class CreateWebhookRequests < ActiveRecord::Migration[<%= ActiveRecord::Migration.current_version %>]
+  def change
+    create_table :webhook_requests, id: :uuid do |t|
+      t.jsonb :payload, default: {}, null: false
+      t.string :source, null: false
+      t.integer :state, null: false, default: 0
+
+      t.timestamps
+    end
+
+    add_index :webhook_requests, :source
+    add_index :webhook_requests, :state
+  end
+end
