@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    action_hooks (0.2.1)
+    action_hooks (0.2.2)
       rails (>= 7.0)
 
 GEM
@@ -286,7 +286,7 @@ DEPENDENCIES
   standard
 
 CHECKSUMS
-  action_hooks (0.2.1)
+  action_hooks (0.2.2)
   actioncable (7.0.10) sha256=7aa02ea26d6cc21c33e604bb28a0759c5212653311bc42105f96f709e507afab
   actionmailbox (7.0.10) sha256=1236f472d86db056f97b3602391becab69c84d9f79d963b9c9b50056e213c1e6
   actionmailer (7.0.10) sha256=53bc7aac1659ef97a216c43002ea8286931d7b97f252b27152ac15de1b2585ef

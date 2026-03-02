@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.2.2] - 2026-03-02
+
+- Fixed `ActionHooks::WebhookController` being unavailable for inheritance in host applications. Moved class from `app/controllers/` (Rails autoloading) to `lib/action_hooks/webhook_controller.rb` (explicit require), so the constant is available immediately when the gem is loaded.
+
 ## [0.2.1] - 2026-03-02
 
 - Fixed migration template to detect primary key type from Rails generators configuration instead of hardcoded PostgreSQL UUID check
