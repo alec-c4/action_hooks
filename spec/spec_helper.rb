@@ -31,7 +31,7 @@ ActiveRecord::Schema.define do
   end
 end
 
-require_relative "../app/models/action_hooks/webhook_request"
+require "action_hooks/webhook_request"
 
 RSpec.configure do |config|
   config.example_status_persistence_file_path = ".rspec_status"

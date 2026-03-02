@@ -1,8 +1,9 @@
 ## [Unreleased]
 
-## [0.2.2] - 2026-03-02
+## [0.2.3] - 2026-03-02
 
-- Fixed `ActionHooks::WebhookController` being unavailable for inheritance in host applications. Moved class from `app/controllers/` (Rails autoloading) to `lib/action_hooks/webhook_controller.rb` (explicit require), so the constant is available immediately when the gem is loaded.
+- Fixed `ActionHooks::WebhookRequest` being unavailable in host applications. Moved from `app/models/` to `lib/action_hooks/webhook_request.rb` with explicit require.
+- Fixed `ActionHooks::WebhookController` being unavailable for inheritance in host applications. Moved from `app/controllers/` to `lib/action_hooks/webhook_controller.rb` with explicit require.
 
 ## [0.2.1] - 2026-03-02
 

@@ -8,4 +8,5 @@ module ActionHooks
 end
 require "action_hooks/engine"
 require "action_hooks/webhook_controller_behavior"
+require "action_hooks/webhook_request"
 require "action_hooks/webhook_controller"
