@@ -1,16 +1,11 @@
 class CreateWebhookRequests < ActiveRecord::Migration[<%= ActiveRecord::Migration.current_version %>]
   def change
-    <%-
-      json_type = (ActiveRecord::Base.connection.adapter_name.downcase == "postgresql") ? :jsonb : :json
-      
-      supports_uuid = if ActiveRecord::Base.connection.respond_to?(:supports_uuid?) 
-        ActiveRecord::Base.connection.supports_uuid? # PostgreSQL
-      else 
-        false # Defaults for others like SQLite, typical MySQL setups unless explicitly configured
+    create_table :webhook_requests, id: primary_key_type do |t|
+      if t.respond_to?(:jsonb)
+        t.jsonb :payload, default: {}, null: false
+      else
+        t.json :payload, default: {}, null: false
       end
-    -%>
-    create_table :webhook_requests<%= supports_uuid ? ", id: :uuid" : "" %> do |t|
-      t.<%= json_type %> :payload, default: {}, null: false
       t.string :source, null: false
       t.integer :state, null: false, default: 0
 
@@ -19,5 +14,12 @@ class CreateWebhookRequests < ActiveRecord::Migration[<%= ActiveRecord::Migratio
 
     add_index :webhook_requests, :source
     add_index :webhook_requests, :state
+  end
+
+  private
+
+  def primary_key_type
+    config = Rails.configuration.generators
+    config.options[config.orm][:primary_key_type] || :primary_key
   end
 end

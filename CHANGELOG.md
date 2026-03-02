@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+## [0.2.1] - 2026-03-02
+
+- Fixed migration template to detect primary key type from Rails generators configuration instead of hardcoded PostgreSQL UUID check
+- Fixed JSON column type detection to use `t.respond_to?(:jsonb)` instead of checking adapter name directly
+
 ## [0.2.0] - 2026-03-02
 
 - Refactored ActionHooks to operate purely as middleware. It now automatically mounts `POST /webhooks/:source` without needing any generated configuration route handling.
