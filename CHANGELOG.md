@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.2.4] - 2026-07-15
+
+- Updated development and test dependencies, including security patches for actionpack (8.1.2.1), nokogiri (1.19.4), rack (3.2.6), and net-imap (0.6.4.1). No changes to the gem's runtime code.
+
 ## [0.2.3] - 2026-03-02
 
 - Fixed `ActionHooks::WebhookRequest` being unavailable in host applications. Moved from `app/models/` to `lib/action_hooks/webhook_request.rb` with explicit require.
