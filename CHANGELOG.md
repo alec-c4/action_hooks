@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-11
+
+### Changed
+
+- **Breaking:** Require Ruby 3.3 or newer. Ruby 3.2 is no longer supported.
+
 ## [0.2.4] - 2026-07-15
 
 - Updated development and test dependencies, including security patches for actionpack (8.1.2.1), nokogiri (1.19.4), rack (3.2.6), and net-imap (0.6.4.1). No changes to the gem's runtime code.
